@@ -1,0 +1,108 @@
+<main class='container text-center jumbotron'>
+    <h1>Burger Builder</h1>
+    <div style='margin: 20px 0px'>
+        <input id='burgerName' type='text' placeholder='Add another burger'>
+        <br>
+        <br>
+        <button id='createBurger' type='submit' class='btn btn-outline-dark'>Add to Ready list</button>
+    </div>
+    <div class='row text-center'>
+        <div class='col-sm-6'>
+            <h3 class='text-center'>Ready to be Eaten</h3>
+            <ul>
+                {{#each burgers}}
+                    {{#unless devoured}}
+                        <div class='text-center'>
+                            <p data={{id}}>{{name}}</p>
+                            <button type='submit' class='btn btn-outline-success readyButtons'>Eat</button>
+                            <br>
+                            <br>
+                        </div>
+                    {{/unless}}
+                {{/each}}
+            </ul>
+        </div>
+        <div class='col-sm-6'>
+            <h3 class='text-center'>Eaten</h3>
+            <ul>
+                {{#each burgers}}
+                    {{#if devoured}}
+                        <div class='text-center'>
+                            <p>You have Previously Eaten:</p>
+                            <p data={{id}}>{{name}}</p>
+                            <br>
+                            <br>
+                        </div>
+                    {{/if}}
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+</main>
+
+<script>
+
+    const addButton = document.querySelector("#createBurger");
+    const eatButtons = document.querySelectorAll(".readyButtons");
+    console.log(eatButtons);
+    eatButtons.forEach((currentButton) => {
+            currentButton.addEventListener("click", eatBurger)
+        });
+
+
+    addButton.addEventListener("click", addBurger);
+
+    function addBurger() {
+        const burgerToAdd = document.querySelector("#burgerName").value.trim();
+        console.log(burgerToAdd);
+
+        const data = {
+            addedBurger: burgerToAdd
+        };
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/addBurger", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onload = function() {
+            if (this.status === 200) {
+                console.log(this.responseText);
+                reloadPage();
+            }
+        }
+        xhr.send(JSON.stringify(data));
+    }
+
+    // this function doesn't actually reload the page, but does hit our '/' route
+    function reloadPage () {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "/", true);
+        xhr.onload = function() {
+            console.log("reloaded page.... maybe");
+        }
+        xhr.send()
+    }
+    
+    // make put request to set devoured property to false
+    function eatBurger() {
+        const burgerId = this.previousElementSibling.attributes[0].nodeValue;
+
+        const data = {
+            eatenBurger: burgerId
+        };
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", "/updateBurger", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onload = function () {
+            if (this.status === 200) {
+                console.log(this.responseText);
+            }
+        }
+        xhr.send(JSON.stringify(data));
+    }
+    
+
+
+
+
+</script>
